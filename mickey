@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+if ! command -v docker >/dev/null 2>&1; then
+    printf '%s\n' 'mickey: Docker is required but was not found on PATH.' >&2
+    exit 127
+fi
+
+if [ ! -r "$HOME/.kube/config" ]; then
+    printf '%s\n' "mickey: kubeconfig not found at $HOME/.kube/config" >&2
+    exit 1
+fi
+
+exec docker run --rm -it \
+    --network host \
+    --mount "type=bind,src=$HOME/.kube,dst=/root/.kube,readonly" \
+    -e KUBECONFIG=/root/.kube/config \
+    mickey "$@"
